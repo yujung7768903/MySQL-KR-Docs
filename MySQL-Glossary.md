@@ -13,13 +13,21 @@
 * gap
 InnoDB 인덱스 데이터 구조에서 새 값을 삽입할 수 있는 위치입니다. 당신이 `SELECT ... FOR UPDATE`와 같은 연산으로 행의 집합을 잠그면, InnoDB는 인덱스의 실제 값 뿐만 아니라 gap에도 적용되는 lock을 생성할 수 있습니다. 예를 들어, 수정을 위해 10보다 큰 모든 값을 선택한다면, gap lock은 다른 트랜잭션이 10보다 큰 값을 삽입하는 것을 방지합니다. supremum record 와 infimun record는 현재 인덱스보다 크거나 작은 모든 값을 포함한 gap을 나타냅니다.
 <br>참고: [concurrency](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_concurrency), [gap lock](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_gap_lock), [index](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_index), [infimum record](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_infimum_record), [isolation level](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_isolation_level), [supremum record](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_supremum_record).
-<!-- 
+
+## S
+* snapshot
+특정 시간의 데이터 표현으로, 다른 트랜잭션에 의해 변경이 커밋되더라도 동일하게 유지됩니다. Consistent read를 허용하기 위해 특정 격리 수준에서 사용됩니다.
+
+참고: [commit](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_commit), [consistent read]([consistent read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read)), [isolation level](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_isolation_level), [transaction](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_transaction).
+
+
+
 ## U
 * undo log
-A storage area that holds copies of data modified by active transactions. If another transaction needs to see the original data (as part of a consistent read operation), the unmodified data is retrieved from this storage area.
+활성화된 트랜잭션에 의해 수정된 데이터의 복사본을 저장하는 영역입니다. 다른 트랜잭션에서 원본 데이터를 봐야한다면(consistent read 연산의 일부로), 이 공간에서 수정되지 않은 데이터가 반환됩니다.
 
-In MySQL 5.6 and MySQL 5.7, you can use the innodb_undo_tablespaces variable have undo logs reside in undo tablespaces, which can be placed on another storage device such as an SSD. In MySQL 8.0, undo logs reside in two default undo tablespaces that are created when MySQL is initialized, and additional undo tablespaces can be created using CREATE UNDO TABLESPACE syntax.
+MySQL 5.6과 5.7에서는 undo log가 undo tablespaces에 존재할 수 있도록 [innodb_undo_tablespaces](https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html#sysvar_innodb_undo_tablespaces) 변수를 사용할 수 있으며, SSD와 같은 다른 저장 장치에 위치할 수 있다. MySQL 8.0에서 undo log는 MySQL이 초기화 될때 생성되는 두 개의 기본 undo tablespaces에 존재하고, 추가적인 undo tablespace는 CREATE UNDO TABLESPACE 구문을 통해 생성될 수 있다.
 
-The undo log is split into separate portions, the insert undo buffer and the update undo buffer.
+undo log는 insert undo buffer와 update undo buffer 두 개로 나뉩니다.
 
-See Also consistent read, rollback segment, SSD, system tablespace, transaction, undo tablespace. -->
+참고: [consistent read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read), [rollback segment](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_rollback_segment), [SSD](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_ssd), [system tablespace](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_system_tablespace), [transaction](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_transaction), [undo tablespace](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_undo_tablespace).
