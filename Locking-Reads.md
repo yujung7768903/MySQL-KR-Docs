@@ -1,7 +1,7 @@
 # 15.7.2.4 Locking Reads
 <!-- If you query data and then insert or update related data within the same transaction, the regular SELECT statement does not give enough protection. Other transactions can update or delete the same rows you just queried. InnoDB supports two types of locking reads that offer extra safety: -->
 
-* SELECT ... FOR SHARE
+* SELECT ... FOR SHARE      
 읽고있는 모든 행에 shared mode lock을 세팅한다. 다른 세션은 행을 읽을 수 있지만, 당신의 트랜잭션이 커밋될 때까지 수정할 수는 없습니다. 이러한 행 중 하나가 아직 커밋되지 않은 다른 트랜잭션에 의해 변경된 경우 쿼리는 해당 트랜잭션이 끝날 때까지 기다린 다음 최신 값을 사용합니다.
 
 > Note
