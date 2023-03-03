@@ -15,22 +15,25 @@ InnoDB는 서로 다른 잠금 전략을 사용하여 여기에 설명된 각각
 다음 리스트는 MySQL이 다양한 트랜잭션 레벨을 어떻게 지원하는지 나타낸다. 목록은 가장 흔하게 사용되는 것부터 적게 사용되는 것까지 사용 되는 수준에 따라 정렬됩니다.
 
 * REPEATABLE READ       
-InnoDB 에서 기본 격리 레벨에 해당합니다. [Consistent reads](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read)는 첫번째 읽기 시점에 저장된 [스냅샷](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_snapshot)을 읽습니다. 즉, 동일한 트랜잭션 안에서 몇 가지 기본(nonlocking) `SELECT` 문을 실행하는 경우, 이러한 `SELECT` 문은 서로에 대해서도 일치합니다. [15.7.2.3 “Consistent Nonlocking Reads” 참고](https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html)
-<br>[locking read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_locking_read) (`FOR UPDATE` 또는 `FOR SHARE` 가 활용된 `SELECT`), `UPDATE` 그리고 `DELETE` 문의 경우, locking은 그 구문이 고유한 검색 조건을 가진 고유한 인덱스를 사용하는지 또는 범위 타입의 검색 조건을 사용하는지에 다라 달라집니다.
-<br>
+    InnoDB 에서 기본 격리 레벨에 해당합니다. [Consistent reads](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read)는 첫번째 읽기 시점에 저장된 [스냅샷](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_snapshot)을 읽습니다. 즉, 동일한 트랜잭션 안에서 몇 가지 기본(nonlocking) `SELECT` 문을 실행하는 경우, 이러한 `SELECT` 문은 서로에 대해서도 일치합니다. [15.7.2.3 “Consistent Nonlocking Reads” 참고](https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html)
+    <br>[locking read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_locking_read) (`FOR UPDATE` 또는 `FOR SHARE` 가 활용된 `SELECT`), `UPDATE` 그리고 `DELETE` 문의 경우, locking은 그 구문이 고유한 검색 조건을 가진 고유한 인덱스를 사용하는지 또는 범위 타입의 검색 조건을 사용하는지에 다라 달라집니다.
+    <br>
+    
     * 고유한 검색 조건을 가진 고유한 인덱스의 경우, InnoDB는 검색하는 인덱스 레코드만 잠그고, 이전의 [gap](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_gap)은 잠그지 않습니다.
+  
     * 다른 검색 조건의 경우, InnoDB는 해당 범위에서 다루는 gap에 대해 다른 세션에 의한 삽입을 막기 위해 [gap lock](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_gap_lock) 또는 [next-key lock]을 사용하여 스캔한 인덱스 범위를 잠급니다. gap lock 또는 [next-key lock](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_next_key_lock)에 대한 더 많은 정보를 원할 경우, [15.7.1 "InnoDB Locking"](https://dev.mysql.com/doc/refman/8.0/en/innodb-locking.html) 참고
-
-<br>
+    <br>
 
 * READ COMMITTED        
-같은 트랜잭션에 있더라도 각각의 Consistent read는 그들만의 새로운 스냅샷을 세팅하고 읽습니다. consistent reads에 대한 정보를 위해서는 [15.7.2.3 “Consistent Nonlocking Reads”](https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html) 참고.
-<br>[locking read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_locking_read) (`FOR UPDATE` 또는 `FOR SHARE` 가 활용된 `SELECT`), `UPDATE` 그리고 `DELETE` 문의 경우, InnoDB는 인덱스 레코드만 잠그고, 이전의 gap은 잠그지 않으므로 잠금된 레코드 다음에 새로운 레코드를 자유롭게 삽입할 수 있습니다. Gap locking은 외래키 제약 조건 확인과 중복 키 확인을 위해서만 사용됩니다.
-<br>gap locking이 비활성화되기 때문에, 다른 세션에서 갭에 새로운 행을 추가할 수 있으므로 phantom row 문제가 발생할 수 있습니다. [15.7.4 "Phantom Rows" 참고](https://dev.mysql.com/doc/refman/8.0/en/innodb-next-key-locking.html)
-<br>READ COMMITED 격리 수준에서는 row-based binary logging(행 기반의 이진 로그)만 지원됩니다. 당신이 READ COMMITED를 binlog_format=MIXED와 함께 사용한다면, 서버는 자동으로 row-based logging를 사용할 것입니다.
-<br>READM COMMITED는 다음과 같은 추가적인 효과가 있습니다:
-<br>
+    같은 트랜잭션에 있더라도 각각의 Consistent read는 그들만의 새로운 스냅샷을 세팅하고 읽습니다. consistent reads에 대한 정보를 위해서는 [15.7.2.3 “Consistent Nonlocking Reads”](https://dev.mysql.com/doc/refman/8.0/en/innodb-consistent-read.html) 참고.
+    <br>[locking read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_locking_read) (`FOR UPDATE` 또는 `FOR SHARE` 가 활용된 `SELECT`), `UPDATE` 그리고 `DELETE` 문의 경우, InnoDB는 인덱스 레코드만 잠그고, 이전의 gap은 잠그지 않으므로 잠금된 레코드 다음에 새로운 레코드를 자유롭게 삽입할 수 있습니다. Gap locking은 외래키 제약 조건 확인과 중복 키 확인을 위해서만 사용됩니다.
+    <br>gap locking이 비활성화되기 때문에, 다른 세션에서 갭에 새로운 행을 추가할 수 있으므로 phantom row 문제가 발생할 수 있습니다. [15.7.4 "Phantom Rows" 참고](https://dev.mysql.com/doc/refman/8.0/en/innodb-next-key-locking.html)
+    <br>READ COMMITED 격리 수준에서는 row-based binary logging(행 기반의 이진 로그)만 지원됩니다. 당신이 READ COMMITED를 binlog_format=MIXED와 함께 사용한다면, 서버는 자동으로 row-based logging를 사용할 것입니다.
+    <br>READM COMMITED는 다음과 같은 추가적인 효과가 있습니다:
+    <br>
+
     * UPDATE 또는 DELETE 문의 경우, InnoDB는 업데이트나 삭제할 행에 대해서만 잠금을 유지합니다. 일치하는 않는 행에 대한 Record locks은 MySQL이 WHERE 조건을 평가한 이후에 해제됩니다. 이는 deadlock에 대한 가는성을 크게 줄이지만, 여전히 발생할 수 있습니다.
+
     * UPDATE 문의 경우, 행이 이미 잠금되었다면, InnoDB는 MySQL이 행이 UPDATE의 WHERE 조건과 일치하는지에 대해 판단할 수 있도록 "semi-consistent" read를 수행하고 가장 최신의 커밋된 버전을 반환합니다. 행이 일치한다면 (업데이트 해야함), MySQL은 그 행을 다시 읽고, 이번에는 InnoDB가 잠그거나 잠그는 것을 기다립니다.
 
     <br>이 테이블을 가지고, 다음의 예시를 고려해보십시오:
